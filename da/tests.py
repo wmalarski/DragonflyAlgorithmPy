@@ -36,9 +36,9 @@ def bent_cigar(s_flag, r_flag):
 
 def rosenbrock(s_flag, r_flag):
     def func(x):
-        x = _sr_function(x, _os_rosenbrock, _mr_rosenbrock, 2048.0 / 100.0, s_flag, r_flag)
-        p1 = np.power(x[:, 1:] - np.power(x[:, :-1], 2.0), 2.0)
-        p2 = (1 - x[:, 0:-1])
+        x = _sr_function(x, _os_rosenbrock, _mr_rosenbrock, 0.1, s_flag, r_flag)
+        p1 = 100 * np.power(np.power(x[:, :-1], 2.0) - x[:, 1:], 2.0)
+        p2 = np.power(x[:, :-1] - 1, 2.0)
         return np.sum(p1 + p2, 1)
     return func
 
@@ -46,10 +46,8 @@ def rosenbrock(s_flag, r_flag):
 def rastrigin(s_flag, r_flag):
     def func(x):
         x = _sr_function(x, _os_rastrigin, _mr_rastrigin, 5.12/100.0, s_flag, r_flag)
-        n = x.shape[1]
-        a = 10
-        inner = np.power(x, 2.0) - a * np.cos(2.0 * np.pi * x)
-        return a * n + np.sum(inner, 1)
+        inner = np.power(x, 2.0) - 10 * np.cos(2.0 * np.pi * x) + 10
+        return np.sum(inner, 1)
     return func
 
 
@@ -57,8 +55,7 @@ def zakharov(s_flag, r_flag):
     def func(x):
         x = _sr_function(x, _os_zakharov, _mr_zakharov, 1.0, s_flag, r_flag)
         sum1 = np.sum(np.power(x, 2.0), 1)
-        itr = np.arange(1, x.shape[1] + 1)
-        sum2 = np.sum(x * itr * 0.5, 1)
+        sum2 = np.sum(x * 0.5, 1)
         return sum1 + np.power(sum2, 2) + np.power(sum2, 4)
     return func
 
