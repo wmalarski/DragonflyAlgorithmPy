@@ -57,6 +57,10 @@ def _get_distance_matrix(pos):
     return np.sqrt(np.sum(np.power(pos - pos[:, np.newaxis], 2.0), 2))
 
 
+def _get_distance_vector(pos, v):
+    return np.sqrt(np.sum(np.power(pos - v, 2.0), 1))
+
+
 def _divide(l, m):
     m2 = np.repeat(m, l.shape[1]).reshape(l.shape)
     ind_non0 = np.where(m2 > 0)
@@ -93,12 +97,13 @@ def dragonfly_algorithm(function, agents, lbd, ubd, iteration, param_fun=_variab
     results = np.zeros(iteration)
     mean = np.zeros(iteration)
     min_result = np.zeros(iteration)
+    mean_vel = np.zeros(iteration)
+    params = np.zeros((iteration, 6))
 
     for i in range(iteration):
         # Update the food source and enemy
-        food_ind = np.argmin(values)
+        food_pos = min_pos
         enemy_ind = np.argmax(values)
-        food_pos = pos[food_ind, :]
         enemy_pos = pos[enemy_ind, :]
 
         # Update w, s, a, c, f, and e
@@ -110,9 +115,11 @@ def dragonfly_algorithm(function, agents, lbd, ubd, iteration, param_fun=_variab
 
         # Calculate distance between agents
         distance_matrix = _get_distance_matrix(pos)
+        distance_food = _get_distance_vector(pos, food_pos)
 
         # Find neighbours
         n_matrix = ((distance_matrix < radius_norm) - np.eye(agents, dtype=np.int8)).reshape(n_shape)
+        n_food = ((distance_food < radius_norm) + 0).reshape((agents, 1))
 
         # Position and Velocity matrix
         p_matrix = np.tile(pos, agents).reshape(x_shape)
@@ -120,18 +127,20 @@ def dragonfly_algorithm(function, agents, lbd, ubd, iteration, param_fun=_variab
 
         # Calculate number of neighbours
         neighbours_cnt = np.sum(n_matrix, axis=1)
-        (neighbours_cnt_eq_0, _) = np.where(neighbours_cnt == 0)
+        neighbours_cnt_eq_0, _ = np.where(neighbours_cnt == 0)
+        neighbours_cnt_gt_0, _ = np.where(neighbours_cnt > 0)
 
         separation = np.sum((pos - p_matrix) * n_matrix, 0)                         # Eq. 3.1
         alignment = _divide(np.sum(v_matrix * n_matrix, 0), neighbours_cnt)         # Eq. 3.2
         cohesion = _divide(np.sum(p_matrix * n_matrix, 0), neighbours_cnt) - pos    # Eq. 3.3
-        food = n_matrix[food_ind] * (food_pos - pos)                                # Eq. 3.4
+        food = n_food * (food_pos - pos)                                     # Eq. 3.4
         enemy = n_matrix[enemy_ind] * (enemy_pos + pos)                             # Eq. 3.5
 
         # Update velocity and position
         vel = vel * w + separation * s + alignment * a + cohesion * c + food * f + enemy * e  # Eq. 3.6
+        # print vel
         vel[neighbours_cnt_eq_0] = np.zeros(dim)
-        pos += vel  # Eq. 3.7
+        pos[neighbours_cnt_gt_0] += vel[neighbours_cnt_gt_0]  # Eq. 3.7
         pos[neighbours_cnt_eq_0] *= _levy(dim, neighbours_cnt_eq_0.size)  # Eq. 3.8
 
         # Check and correct the new positions based on the boundaries of variables
@@ -140,21 +149,39 @@ def dragonfly_algorithm(function, agents, lbd, ubd, iteration, param_fun=_variab
         # Prepare to next iteration, save data
         values = function(pos)
         function_cnt += agents
+
         act_min_ind = np.argmin(values)
         act_min = values[act_min_ind]
         results[i] = act_min
         mean[i] = np.mean(values)
+        mean_vel[i] = np.mean(np.sqrt(np.sum(np.power(vel, 2), 1)))
+        params[i, :] = a, c, e, f, s, w
+
         if act_min < min_value:
-            min_value, min_pos = act_min, pos[act_min_ind]
+            min_value_ind, min_value, min_pos[:] = act_min_ind, act_min, pos[act_min_ind, :]
         min_result[i] = min_value
 
     if plot:
+        plt.subplot(3, 1, 1)
         plt.plot(iter_x, results, label="Iteration result")
         plt.plot(iter_x, min_result, label="Global result")
         plt.legend(fontsize='medium')
         plt.title("Dragonfly Algorithm Evolution")
         plt.xlabel("Iterations")
         plt.ylabel("Function value")
+
+        plt.subplot(3, 1, 2)
+        plt.plot(iter_x, mean_vel)
+        plt.title("Mean Velocity")
+
+        plt.subplot(3, 1, 3)
+        plt.plot(iter_x, params[:, 0], label="a")
+        plt.plot(iter_x, params[:, 1], label="c")
+        plt.plot(iter_x, params[:, 2], label="e")
+        plt.plot(iter_x, params[:, 3], label="f")
+        plt.plot(iter_x, params[:, 4], label="s")
+        plt.plot(iter_x, params[:, 5], label="w")
+        plt.legend(fontsize='medium')
         plt.show()
 
     return min_pos, min_value, function_cnt

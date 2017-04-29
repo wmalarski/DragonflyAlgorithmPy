@@ -1,14 +1,22 @@
 import da
-import param as p
 import numpy as np
-
-
-def fun(x):
-    return np.sum(np.power(x, 2), 1) + 1
+import matplotlib.pyplot as plt
+import param as p
+import tests as t
 
 agents = 50
-it = 1999
-n = 100
+it = 500
+tests = 100
 
-da.variable_plot(p.params1, it, n)
-da.dragonfly_algorithm(fun, agents, np.array([-100, -100]), np.array([100, 100]), it, p.params1, True)
+# da.variable_plot(p.params1, it, tests)
+lb = -100 * np.ones(10)
+ub = 100 * np.ones(10)
+b = np.array([lb, ub])
+
+
+s, r = False, False
+
+print da.dragonfly_algorithm(t.bent_cigar(s, r), agents, lb, ub, it, p.params1, True)
+print da.dragonfly_algorithm(t.rosenbrock(s, r), agents, lb, ub, it, p.params1, True)
+print da.dragonfly_algorithm(t.rastrigin(s, r), agents, lb, ub, it, p.params1, True)
+print da.dragonfly_algorithm(t.zakharov(s, r), agents, lb, ub, it, p.params1, True)
