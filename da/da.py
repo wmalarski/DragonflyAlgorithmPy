@@ -71,11 +71,9 @@ def _divide(l, m):
 def _border_reflection(pos, vel, lbd, ubd):
     diff = ubd - lbd
     f = np.floor(pos/diff + 0.5)
+    vel[np.where(pos < lbd)] *= -1
+    vel[np.where(pos > ubd)] *= -1
     pos = (pos - diff * f) * np.power(-1.0, f)
-    yl = np.where(pos < lbd)
-    yu = np.where(pos > ubd)
-    vel[yl] *= -1
-    vel[yu] *= -1
     return pos, vel
 
 

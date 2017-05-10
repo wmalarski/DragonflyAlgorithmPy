@@ -8,7 +8,7 @@ agents = 50
 it = 1999
 lb = -100 * np.ones(dim)
 ub = 100 * np.ones(dim)
-s, r = False, False
+s, r = False, True
 
 n = 10
 results = np.zeros((n, 4))
