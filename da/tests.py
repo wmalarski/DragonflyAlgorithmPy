@@ -15,19 +15,8 @@ _os_rastrigin = np.loadtxt("shift_data_5.txt")
 
 
 def _sr_function(x, os, mr, sh_rate, s_flag, r_flag):
-    if s_flag:
-        if r_flag:
-            y = (x - os) * sh_rate
-            sr_x = np.asarray(mr * y.T).T
-        else:
-            sr_x = (x - os)*sh_rate
-    else:
-        if r_flag:
-            y = x * sh_rate
-            sr_x = np.asarray(mr * y.T).T
-        else:
-            sr_x = x * sh_rate
-    return sr_x
+    y = (x - os if s_flag else x) * sh_rate
+    return np.asarray(mr * y.T).T if r_flag else y
 
 
 def bent_cigar(s_flag, r_flag):
@@ -64,12 +53,3 @@ def zakharov(s_flag, r_flag):
         sum2 = np.sum(x2 * 0.5 * ir, 1)
         return sum1 + np.power(sum2, 2) + np.power(sum2, 4)
     return func
-
-
-def plot_contour(func):
-    X, Y = np.mgrid[-100:100:0.5, -100:100:0.5]
-    positions = np.vstack([X.ravel(), Y.ravel()]).T
-    Z = func(positions).reshape(X.shape)
-    CS = plt.contour(X, Y, Z)
-    plt.clabel(CS, inline=1, fontsize=10)
-    plt.show()

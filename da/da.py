@@ -7,6 +7,7 @@ _beta = 1.5
 _l = (_gamma2d5 * np.sin(np.pi * _beta / 2.0))
 _m = _gamma1d25 * _beta * pow(2.0, (_beta - 1.0) / 2.0)
 _omega = np.power(_l / _m, 1 / _beta)
+_eps = 1e-8
 
 
 def _levy(dim, n):
@@ -53,12 +54,14 @@ def _random_population(lbd, ubd, n):
     return np.random.random((n, lbd.size)) * (ubd - lbd) + lbd
 
 
-def _get_distance_matrix(pos):
-    return np.sqrt(np.sum(np.power(pos - pos[:, np.newaxis], 2.0), 2))
+def _get_neighbours_matrix(pos, radius, agents):
+    t = np.abs(pos - pos[:, np.newaxis]) < radius
+    return np.all(t, 2) - np.eye(agents, dtype=np.int8)
 
 
-def _get_distance_vector(pos, v):
-    return np.sqrt(np.sum(np.power(pos - v, 2.0), 1))
+def _get_neighbours_vector(pos, radius, food_pos):
+    t = np.abs(pos - food_pos) < radius
+    return np.all(t, 1) + 0.0
 
 
 def _divide(l, m):
@@ -70,20 +73,22 @@ def _divide(l, m):
 
 def _border_reflection(pos, vel, lbd, ubd):
     diff = ubd - lbd
-    f = np.floor(pos/diff + 0.5)
+    f = np.floor(pos/diff - lbd/diff)
+    lm = (np.mod(f, 2.0) == 1.0).real * (ubd + lbd)
     vel[np.where(pos < lbd)] *= -1
     vel[np.where(pos > ubd)] *= -1
-    pos = (pos - diff * f) * np.power(-1.0, f)
+    pos = (pos - diff * f) * np.power(-1.0, f) + lm
     return pos, vel
 
 
-def dragonfly_algorithm(function, agents, lbd, ubd, iteration, param_fun=_variable_param, plot=False):
+def dragonfly_algorithm(function, agents, lbd, ubd, iteration, param_fun=_variable_param, plot=False, goal=0.0):
     dim = lbd.shape[0]
     x_shape = (agents, agents, dim)
     n_shape = (agents, agents, 1)
 
+    vel_max = (ubd - lbd)/10.0
     pos = _random_population(lbd, ubd, agents)
-    vel = np.random.random((agents, dim))
+    vel = np.zeros((agents, dim))  # np.random.random((agents, dim))
     values = function(pos)
     function_cnt = agents
 
@@ -109,15 +114,10 @@ def dragonfly_algorithm(function, agents, lbd, ubd, iteration, param_fun=_variab
 
         # Update neighbouring radius
         radius = _get_radius(i, iteration, lbd, ubd)
-        radius_norm = np.sqrt(np.sum(np.power(radius, 2)))
-
-        # Calculate distance between agents
-        distance_matrix = _get_distance_matrix(pos)
-        distance_food = _get_distance_vector(pos, food_pos)
 
         # Find neighbours
-        n_matrix = ((distance_matrix < radius_norm) - np.eye(agents, dtype=np.int8)).reshape(n_shape)
-        n_food = ((distance_food < radius_norm) + 0).reshape((agents, 1))
+        n_matrix = _get_neighbours_matrix(pos, radius, agents).reshape(n_shape)
+        n_food = _get_neighbours_vector(pos, radius, food_pos).reshape((agents, 1))
 
         # Position and Velocity matrix
         p_matrix = np.tile(pos, agents).reshape(x_shape)
@@ -136,7 +136,12 @@ def dragonfly_algorithm(function, agents, lbd, ubd, iteration, param_fun=_variab
 
         # Update velocity and position
         vel = vel * w + separation * s + alignment * a + cohesion * c + food * f + enemy * e  # Eq. 3.6
-        # print vel
+
+        vg_max_y, vg_max_x = np.where(vel > vel_max)
+        vl_min_y, vl_min_x = np.where(vel < -vel_max)
+        vel[vg_max_y, vg_max_x] = vel_max[vg_max_x]
+        vel[vl_min_y, vl_min_x] = -vel_max[vl_min_x]
+
         vel[neighbours_cnt_eq_0] = np.zeros(dim)
         pos[neighbours_cnt_gt_0] += vel[neighbours_cnt_gt_0]  # Eq. 3.7
         pos[neighbours_cnt_eq_0] *= _levy(dim, neighbours_cnt_eq_0.size)  # Eq. 3.8
@@ -158,6 +163,9 @@ def dragonfly_algorithm(function, agents, lbd, ubd, iteration, param_fun=_variab
         if act_min < min_value:
             min_value_ind, min_value, min_pos[:] = act_min_ind, act_min, pos[act_min_ind, :]
         min_result[i] = min_value
+
+        if np.abs(min_value - goal) < _eps:
+            break
 
     if plot:
         plt.subplot(3, 1, 1)
