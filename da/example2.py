@@ -4,8 +4,8 @@ import matplotlib.pyplot as plt
 import param as p
 import tests as t
 
-agents = 50
-it = 1999
+agents = 20
+it = 500
 tests = 100
 
 # da.variable_plot(p.params1, it, tests)
@@ -21,7 +21,11 @@ s, r = True, True
 
 
 def kw(x):
-    return np.sum(np.power(x+5, 2.0), 1)
+    return np.sum(np.power(x + 5, 2.0), 1)
 
-v = np.array([[[2.0] * 10], [[3.0] * 10]])
-print da.dragonfly_algorithm(kw, agents, lb, ub, it, plot=True)
+# pm = p.params3(0.1, 0.9, 0.5, 0.3, 0.9)
+# pm = p.param_const(0.1, 0.1, 0.1, 2.2, 0.0, 0.5)
+pm = p.params1
+
+print da.dragonfly_algorithm(t.rastrigin(False, False), agents, lb, ub, it, pm, plot=True)
+
