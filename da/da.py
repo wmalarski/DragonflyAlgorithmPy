@@ -16,19 +16,7 @@ def _levy(dim, n):
     return 0.01 * ((r1 * _omega) / np.power(np.abs(r2), 1.0 / _beta))
 
 
-def _variable_param(i, maxi):
-    w = 0.9 - i * ((0.9 - 0.4) / maxi)
-    my_c = 0.1 - i * ((0.1 - 0.0) / (maxi / 2.0))
-    my_c = 0 if my_c < 0 else my_c
-    s = 2 * np.random.sample() * my_c  # Seperation weight
-    a = 2 * np.random.sample() * my_c  # Alignment weight
-    c = 2 * np.random.sample() * my_c  # Cohesion weight
-    f = 2 * np.random.sample()  # Food attraction weight
-    e = my_c  # Enemy distraction weight
-    return a, c, e, f, s, w
-
-
-def _variable_param_n(i, maxi, agents):
+def _variable_param(i, maxi, agents):
     w = 0.9 - i * ((0.9 - 0.4) / maxi)
     my_c = 0.1 - i * ((0.1 - (-0.1)) / maxi)
     my_c = 0 if my_c < 0 else my_c
