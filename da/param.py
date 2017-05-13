@@ -21,7 +21,7 @@ def params2(w1=0.9, w2=0.1, w3=0.1, w4=0.0, w5=2.0):
     def rand():
         return np.random.sample()
 
-    def function(i, maxi):
+    def function(i, maxi, agents):
         my_c = w3 - i * ((w3 - w4) / (maxi / w5))
         my_c = 0 if my_c < 0 else my_c
         s = 2 * rand() * my_c
@@ -37,7 +37,7 @@ def params2(w1=0.9, w2=0.1, w3=0.1, w4=0.0, w5=2.0):
 def params3(ws=0.5, wa=0.5, wc=0.5, we=0.5, wf=2.0):
     def rand(): return np.random.sample()
 
-    def function(i, maxi):
+    def function(i, maxi, agents):
         w = 0.9 - i * ((0.9 - 0.4) / maxi)
         m = 0.1 - i * ((0.1 - 0.0) / (maxi / 1.5))
         m = 0.0 if m < 0.0 else m
@@ -51,6 +51,6 @@ def params3(ws=0.5, wa=0.5, wc=0.5, we=0.5, wf=2.0):
 
 
 def param_const(a, c, e, f, s, w):
-    def function(i, maxi):
+    def function(i, maxi, agents):
         return a, c, e, f, s, w
     return function
