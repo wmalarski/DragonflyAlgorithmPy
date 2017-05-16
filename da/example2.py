@@ -27,5 +27,5 @@ def kw(x):
 # pm = p.param_const(0.1, 0.1, 0.1, 2.2, 0.0, 0.5)
 pm = p.params1
 
-print da.dragonfly_algorithm(t.rastrigin(False, False), agents, lb, ub, it, pm, plot=True)
+print da.dragonfly_algorithm(t.rastrigin(False, False), agents, lb, ub, it, plot=True)
 
