@@ -1,6 +1,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+ss = 0.1
+a = 0.1
+c = 0.1
+
 _mr_bent_cigar = np.asmatrix(np.loadtxt("M_1_D10.txt"))
 _os_bent_cigar = np.loadtxt("shift_data_1.txt")
 
