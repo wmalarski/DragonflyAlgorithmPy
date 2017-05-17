@@ -42,7 +42,11 @@ def variable_plot(param_fun, maxi, n):
     plt.plot(iter_x, arr[:, 3], label="f")
     plt.plot(iter_x, arr[:, 4], label="s")
     plt.plot(iter_x, arr[:, 5], label="w")
+    plt.title("Zbieznosc parametrow")
+    plt.xlabel("Liczba iteracji")
+    plt.ylabel("Wartosc wagi")
     plt.legend(fontsize='medium')
+    plt.savefig("paramevolution.png")
     plt.show()
 
 

@@ -10,7 +10,7 @@ def params(ws, wa, wc, we, wf):
 
     def function(i, maxi, agents=1):
         w = 0.9 - i * ((0.9 - 0.4) / maxi)
-        m = 0.1 - i * ((0.10 - (-0.5)) / (maxi / 2.0))
+        m = 0.1 - i * ((0.15 - 0.0) / (maxi / 2.0))
         m = 0.0 if m < 0.0 else m
 
         s = ws * m * rand()
