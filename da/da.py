@@ -16,7 +16,7 @@ def _levy(dim, n):
     return 0.01 * ((r1 * _omega) / np.power(np.abs(r2), 1.0 / _beta))
 
 
-def _variable_param(i, maxi, agents):
+def _variable_param(i, maxi, agents=1):
     w = 0.9 - i * ((0.9 - 0.4) / maxi)
     my_c = 0.1 - i * ((0.1 - (-0.1)) / maxi)
     my_c = 0 if my_c < 0 else my_c
@@ -34,7 +34,7 @@ def variable_plot(param_fun, maxi, n):
     for i in range(maxi):
         res = np.zeros((n, 6))
         for j in range(n):
-            res[j, :] = np.asarray(param_fun(i, maxi))
+            res[j, :] = np.asarray(param_fun(i, maxi, 1))
         arr[i, :] = np.mean(res, axis=0)
     plt.plot(iter_x, arr[:, 0], label="a")
     plt.plot(iter_x, arr[:, 1], label="c")
@@ -100,14 +100,14 @@ def dragonfly_algorithm(function, agents, lbd, ubd, iteration, param_fun=_variab
     enemy_pos = pos[enemy_ind, :]
     enemy_val = values[enemy_ind]
 
-    iter_x = np.arange(iteration)
-    results = np.zeros(iteration)
-    mean = np.zeros(iteration)
-    min_result = np.zeros(iteration)
-    mean_vel = np.zeros(iteration)
-    values_matrix = np.zeros((iteration, agents))
+    iter_x = np.arange(iteration-1)
+    results = np.zeros(iteration-1)
+    mean = np.zeros(iteration-1)
+    min_result = np.zeros(iteration-1)
+    mean_vel = np.zeros(iteration-1)
+    values_matrix = np.zeros((iteration-1, agents))
 
-    for i in range(iteration):
+    for i in range(iteration-1):
         # Update the food source and enemy
         food_pos = min_pos[:]
         enemy_ind_act = np.argmax(values)
@@ -179,9 +179,8 @@ def dragonfly_algorithm(function, agents, lbd, ubd, iteration, param_fun=_variab
             break
 
     if plot:
-        # plt.subplot(3, 1, 1)
-        for i in range(values_matrix.shape[1]):
-            plt.plot(iter_x, values_matrix[:, i], '-k', lw=0.25, ms=0.3)
+        # for i in range(values_matrix.shape[1]):
+        #     plt.plot(iter_x, values_matrix[:, i], '-k', lw=0.25, ms=0.3)
         plt.plot(iter_x, results, label="Optimum w iteracji")
         plt.plot(iter_x, min_result, label="Optimum globalne")
         plt.legend(fontsize='medium')
@@ -189,19 +188,6 @@ def dragonfly_algorithm(function, agents, lbd, ubd, iteration, param_fun=_variab
         plt.xlabel("Liczba iteracji")
         plt.ylabel("Wartosc funkcji")
         plt.savefig("evolution.png")
-
-        # plt.subplot(3, 1, 2)
-        # plt.plot(iter_x, mean_vel)
-        # plt.title("Mean Velocity")
-        #
-        # plt.subplot(3, 1, 3)
-        # plt.plot(iter_x, params[:, 0], label="a")
-        # plt.plot(iter_x, params[:, 1], label="c")
-        # plt.plot(iter_x, params[:, 2], label="e")
-        # plt.plot(iter_x, params[:, 3], label="f")
-        # plt.plot(iter_x, params[:, 4], label="s")
-        # plt.plot(iter_x, params[:, 5], label="w")
-        # plt.legend(fontsize='medium')
         plt.show()
 
     return min_pos, min_value, function_cnt
