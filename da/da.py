@@ -1,19 +1,15 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-_gamma1d25 = 1.1330030963193471
-_gamma2d5 = 3.323350970447843
 _beta = 1.5
-_l = (_gamma2d5 * np.sin(np.pi * _beta / 2.0))
-_m = _gamma1d25 * _beta * pow(2.0, (_beta - 1.0) / 2.0)
-_omega = np.power(_l / _m, 1 / _beta)
+_sigma = 0.6966
 _eps = 1e-8
 
 
 def _levy(dim, n):
     r1 = np.random.normal(size=(n, dim))
     r2 = np.random.normal(size=(n, dim))
-    return 0.01 * ((r1 * _omega) / np.power(np.abs(r2), 1.0 / _beta))
+    return 0.01 * ((r1 * _sigma) / np.power(np.abs(r2), 1.0 / _beta))
 
 
 def _variable_param(i, maxi, agents=1):
