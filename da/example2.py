@@ -15,7 +15,7 @@ ub = 100 * np.ones(10)
 shift, rotation = True, True
 
 parameters = p.params(
-    ws=01., wa=0.1, wc=0.1,
+    ws=0.1, wa=0.1, wc=0.1,
     we=0.1, wf=2.0
 )
 
